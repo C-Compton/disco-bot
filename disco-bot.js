@@ -1,4 +1,7 @@
-require('dotenv').config()
+const dotenv = require('dotenv')
+if(dotenv.error) {
+    console.log(dotenv.error)
+}
 const Discord = require('discord.js')
 const client = new Discord.Client()
 
