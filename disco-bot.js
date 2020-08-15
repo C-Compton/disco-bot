@@ -11,14 +11,14 @@ client.on('disconnect', () => {
 })
 
 client.on('message', (received) => {
-    if(received.author == client.user ){
+    if(received.author.id === client.user.id ){
         return
     }
 
     if(received.mentions.has(client.user)) {
         received.channel.send(`What's up, ${received.author.toString()}? 
         Type '>help' for a list of commands.
-        Type '>help [command] for detailed help on available commands.`)
+        Type '>help [command]' for detailed help on available commands.`)
     }
 
     if(received.content.startsWith(">")) {
@@ -66,8 +66,9 @@ function rollCommand(cmd, args, received) {
     const re = /\d+/g
     const dice = args[0]
 
-    if (args == 'help') {
-        received.channel.send(">" + cmd + " xdy : rolls x y-sided dice. e.g roll 2d6")
+    if (dice == 'help') {
+        received.channel.send(`Rolls a number of N-sided dice
+        Example: '>${cmd} 2d6' will roll two 6-sided dice. `)
     } else if (testRe.test(dice) ) {
         const matches = dice.match(re)
         const numDice = matches[0]
@@ -76,10 +77,10 @@ function rollCommand(cmd, args, received) {
         for (let index = 0; index < numDice; index++) {
             result.push(randInt(1, die))
         }
-        
-        received.channel.send(received.author.toString() + " rolled " + args + " and got " + result.sort((a,b) => {return a - b}).join(', '))
+        received.channel.send(`${received.author.toString()} rolled ${dice}
+        ${result.sort((a,b) => {return a - b}).join(', ')}`)
     } else {
-        received.channel.send("I'm sorry, " + received.author.toString() + ", I can't roll " + args)
+        received.channel.send(`I'm sorry, ${received.author.toString()}, I can't roll ${args}`)
     }
 }
 
