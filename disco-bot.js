@@ -16,25 +16,26 @@ client.on('message', (received) => {
     }
 
     if(received.mentions.has(client.user)) {
-        received.channel.send("What's up, " + received.author.toString() + "? Type '!help' for a list of commands. Type '!help [command] for detailed help on available commands.")
+        received.channel.send(`What's up, ${received.author.toString()}? 
+        Type '>help' for a list of commands.
+        Type '>help [command] for detailed help on available commands.`)
     }
 
-    if(received.content.startsWith("!")) {
+    if(received.content.startsWith(">")) {
         parseArgs(received)
     }
 
 })
 
 function parseArgs(received) {
-    let splitCmd = received.content.split(" ")
-    let primaryCmd = splitCmd[0].trim()
-    let args = splitCmd.slice(1)
-
+    let args = received.content.split(" ")
+    let primaryCmd = args.shift().slice(1).trim()
+    
     processCommand(primaryCmd, args, received)
 }
 
 function processCommand(cmd, args, received) {
-    cmd = cmd.substr(1)
+    
     switch(cmd) {
         case 'help':
             helpCommand(cmd, args, received)
@@ -42,15 +43,17 @@ function processCommand(cmd, args, received) {
         case 'flip':
             flipCommand(cmd, args, received)
             break
+        case 'roll':
+            rollCommand(cmd, args, received)
+            break
         default:
-            received.channel.send("I'm sorry. I don't know that command. Enter '!help' for a list of my commands.")
+            received.channel.send("I'm sorry. I don't know that command. Enter '>help' for a list of my commands.")
     }
 }
 
 function flipCommand(cmd, args, received) {
-    console.log("flipCommand -- cmd: " + cmd + " -- args: " + args)
     if (args == 'help') {
-        received.channel.send("!" + cmd + " : flips a 2-sided coin.")
+        received.channel.send(">" + cmd + " : flips a 2-sided coin.")
         return
     } else {
         let result = randInt(0, 1)
@@ -58,12 +61,37 @@ function flipCommand(cmd, args, received) {
     }
 }
 
+function rollCommand(cmd, args, received) {
+    const testRe = /\d{1,2}d\d{1,3}/
+    const re = /\d+/g
+    const dice = args[0]
+
+    if (args == 'help') {
+        received.channel.send(">" + cmd + " xdy : rolls x y-sided dice. e.g roll 2d6")
+    } else if (testRe.test(dice) ) {
+        const matches = dice.match(re)
+        const numDice = matches[0]
+        const die = matches[1]
+        var result = new Array()
+        for (let index = 0; index < numDice; index++) {
+            result.push(randInt(1, die))
+        }
+        
+        received.channel.send(received.author.toString() + " rolled " + args + " and got " + result.sort((a,b) => {return a - b}).join(', '))
+    } else {
+        received.channel.send("I'm sorry, " + received.author.toString() + ", I can't roll " + args)
+    }
+}
+
 function helpCommand(cmd, args, received) {
-    console.log("helpCommand -- cmd: " + cmd + " -- args: " + args)
     if (args.length > 0) {
         processCommand(args[0], cmd, received)
     } else {
-        received.channel.send("Available commands are : !flip, !roll")
+        received.channel.send(`To enter a command, enter '>' followed by a command and relevant arguments. 
+        Available commands are : 
+        flip
+        help
+        roll`)
     }
 }
 
