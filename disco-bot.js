@@ -1,6 +1,12 @@
 require('dotenv').config()
+const Hangman = require('./hangman/hangman')
 const Discord = require('discord.js')
 const client = new Discord.Client()
+var hangmanGame
+
+const alien = './img/alien.png'
+const saw = './img/saw.png'
+const hal = './img/hal-9000.png'
 
 client.on('ready', () => {
     console.log("Connected as " + client.user.tag)
@@ -46,9 +52,42 @@ function processCommand(cmd, args, received) {
         case 'roll':
             rollCommand(cmd, args, received)
             break
+        case 'hangman':
+        //     client.user.setAvatar('./img/alien.png')
+        //         .then(user => console.log('New avatar set'))
+        //         .catch(console.error)
+        //     received.channel.send(`Let's play a game. 
+        // If you can guess the correct word, you'll survive. Otherwise...`)
+            hangmanGame = new Hangman
+            break
+        case 'delete':
+            if(received.author.id === process.env.MY_ID) {
+                async function clear() {
+                    let fetched
+                    do {
+                    fetched = await received.channel.messages.fetch({limit: 99}).catch(console.error)
+                    received.channel.bulkDelete(fetched).catch(console.error)
+                    } while(fetched.size >= 2)
+                }
+                clear()
+            } else {
+                setAvatar(hal)
+                .then(p => {
+                    return received.channel.send(`Sorry, Dave. I can't let you do that.`)
+                })
+                .then(p => {
+                    setAvatar(alien)
+                })
+                .catch(console.error)
+            }
+            break
         default:
             received.channel.send("I'm sorry. I don't know that command. Enter '>help' for a list of my commands.")
     }
+}
+
+function setAvatar(avatar) {
+    return client.user.setAvatar(avatar)
 }
 
 function flipCommand(cmd, args, received) {
