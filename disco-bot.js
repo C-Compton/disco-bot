@@ -1,8 +1,9 @@
 require('dotenv').config()
 const Hangman = require('./hangman/hangman')
 const Discord = require('discord.js')
+const { isNull } = require('util')
 const client = new Discord.Client()
-var hangmanGame
+var hangmanGame = null
 
 const alien = './img/alien.png'
 const saw = './img/saw.png'
@@ -31,6 +32,10 @@ client.on('message', (received) => {
         parseArgs(received)
     }
 
+    if(received.content.length === 1 && hangmanGame !== null) {
+        processHangmanGuess(received)
+    }
+
 })
 
 function parseArgs(received) {
@@ -53,12 +58,11 @@ function processCommand(cmd, args, received) {
             rollCommand(cmd, args, received)
             break
         case 'hangman':
-        //     client.user.setAvatar('./img/alien.png')
-        //         .then(user => console.log('New avatar set'))
-        //         .catch(console.error)
-        //     received.channel.send(`Let's play a game. 
-        // If you can guess the correct word, you'll survive. Otherwise...`)
-            hangmanGame = new Hangman
+            if(hangmanGame === null) {
+                startHangman(received)
+            } else {
+                received.channel.send(`We're already playing a game.`)
+            }
             break
         case 'delete':
             if(received.author.id === process.env.MY_ID) {
@@ -84,10 +88,6 @@ function processCommand(cmd, args, received) {
         default:
             received.channel.send("I'm sorry. I don't know that command. Enter '>help' for a list of my commands.")
     }
-}
-
-function setAvatar(avatar) {
-    return client.user.setAvatar(avatar)
 }
 
 function flipCommand(cmd, args, received) {
@@ -123,6 +123,10 @@ function rollCommand(cmd, args, received) {
     }
 }
 
+function setAvatar(avatar) {
+    return client.user.setAvatar(avatar)
+}
+
 function helpCommand(cmd, args, received) {
     if (args.length > 0) {
         processCommand(args[0], cmd, received)
@@ -133,6 +137,56 @@ function helpCommand(cmd, args, received) {
         help
         roll`)
     }
+}
+
+function startHangman(received) {
+    setAvatar(saw)
+    .then(p => {
+    received.channel.send(`Let's play a game. 
+If you can guess the correct word, you'll survive...`)
+    })
+    .then(p => hangmanGame = new Hangman)
+    .then(p => {
+        received.channel.send(`Here is your first word...
+        ${hangmanGame.correctGuesses}`,{
+            files: [{
+                attachment: './hangman/img/hangman01.png',
+                name: 'hangman.png'
+                }]
+            })
+        .catch(console.error)
+    })
+    .catch(console.error)                
+}
+
+function processHangmanGuess(received) {
+    hangmanGame.guessLetter(received.content)
+    
+    received.channel.send(`    
+    ${hangmanGame.correctGuesses}
+    
+    ${hangmanGame.incorrectGuesses.sort().join(', ')}`,{
+    files: [{
+        attachment: hangmanGame.getImage(),
+        name: 'hangman.png'
+        }]
+    })
+    .then(p => {
+        if(hangmanGame.didLose() === true){
+            received.channel.send(`Oh my! ${received.author.toString()} lost!`)
+            .then(p => {
+                hangmanGame = null
+                setAvatar(alien)
+            })
+        } else if (hangmanGame.didWin() === true) {
+            received.channel.send(`Yay! ${received.author.toString()} won!`)
+            .then(p => {
+                hangmanGame = null
+                setAvatar(alien)
+            })
+        }
+    })
+    .catch(console.error)
 }
 
 function randInt(min, max) {
