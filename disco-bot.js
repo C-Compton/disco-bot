@@ -65,28 +65,12 @@ function processCommand(cmd, args, received) {
             }
             break
         case 'delete':
-            if(received.author.id === process.env.MY_ID) {
-                async function clear() {
-                    let fetched
-                    do {
-                    fetched = await received.channel.messages.fetch({limit: 99}).catch(console.error)
-                    received.channel.bulkDelete(fetched).catch(console.error)
-                    } while(fetched.size >= 2)
-                }
-                clear()
-            } else {
-                setAvatar(hal)
-                .then(p => {
-                    return received.channel.send(`Sorry, Dave. I can't let you do that.`)
-                })
-                .then(p => {
-                    setAvatar(alien)
-                })
-                .catch(console.error)
-            }
+            deleteCommand(cmd, args, received)
             break
         default:
-            received.channel.send("I'm sorry. I don't know that command. Enter '>help' for a list of my commands.")
+            received.channel.send(`I'm sorry. I don't know that command. 
+            Enter '>help' for a list of my commands.
+            Enter '>help [command]' for help with a specific command.`)
     }
 }
 
@@ -104,8 +88,7 @@ function rollCommand(cmd, args, received) {
     const testRe = /\d{1,2}d\d{1,3}/
     const re = /\d+/g
     const dice = args[0]
-
-    if (dice == 'help') {
+    if (args == 'help') {
         received.channel.send(`Rolls a number of N-sided dice
         Example: '>${cmd} 2d6' will roll two 6-sided dice. `)
     } else if (testRe.test(dice) ) {
@@ -123,15 +106,12 @@ function rollCommand(cmd, args, received) {
     }
 }
 
-function setAvatar(avatar) {
-    return client.user.setAvatar(avatar)
-}
-
 function helpCommand(cmd, args, received) {
     if (args.length > 0) {
         processCommand(args[0], cmd, received)
     } else {
-        received.channel.send(`To enter a command, enter '>' followed by a command and relevant arguments. 
+        received.channel.send(`To enter a command, enter '>' followed by a command and relevant arguments.
+        Enter '>help [command]' for help with a specific command. 
         Available commands are : 
         flip
         help
@@ -139,12 +119,51 @@ function helpCommand(cmd, args, received) {
     }
 }
 
+function deleteCommand(cmd, args, received) {
+    if(received.author.id === process.env.MY_ID) {
+        let fetched
+        async function clear() {
+            do {
+            fetched = await received.channel.messages.fetch({limit: 99}).catch(console.error)
+            received.channel.bulkDelete(fetched).catch(console.error)
+            } while(fetched.size >= 2)
+        }
+
+        async function clearAttach() {
+            do {
+                fetched = await received.channel.messages.fetch({limit: 99})
+                .then(m => {
+                    return m.filter(m => m.attachments.size > 0)
+                })
+                .then(m => {
+                    received.channel.bulkDelete(m).catch(console.error)
+                    return m
+                })
+                .catch(console.error)
+            } while (fetched.size >= 2)
+        }
+
+        if (args.length > 0) {
+            switch(args[0]) {
+                case 'attachment':
+                    clearAttach()                
+                break
+                default:
+                    console.log(`Unknown arg to delete cmd`)
+            }
+        } else {
+            
+                clear()
+        }
+    } else {
+        received.channel.send(`Sorry, Dave. I can't let you do that.`)
+        .catch(console.error)
+    }
+}
+
 function startHangman(received) {
-    setAvatar(saw)
-    .then(p => {
     received.channel.send(`Let's play a game. 
 If you can guess the correct word, you'll survive...`)
-    })
     .then(p => hangmanGame = new Hangman)
     .then(p => {
         received.channel.send(`Here is your first word...
@@ -176,13 +195,11 @@ function processHangmanGuess(received) {
             received.channel.send(`Oh my! ${received.author.toString()} lost!`)
             .then(p => {
                 hangmanGame = null
-                setAvatar(alien)
             })
         } else if (hangmanGame.didWin() === true) {
             received.channel.send(`Yay! ${received.author.toString()} won!`)
             .then(p => {
                 hangmanGame = null
-                setAvatar(alien)
             })
         }
     })

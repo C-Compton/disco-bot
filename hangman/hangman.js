@@ -41,7 +41,6 @@ class Hangman {
             }
             files.forEach(file => {
                 let filePath = this.#imgDir + file
-                console.log(filePath)
                 this.#images.push(filePath)
 
             })
@@ -51,7 +50,6 @@ class Hangman {
 
     getImage() {
         var img = this.#images[this.#state]
-        console.log(`Found image at: ${img}`)
         return img
     }
 
@@ -64,7 +62,6 @@ class Hangman {
     }
 
     guessLetter(letter){
-        console.log(`Guess: ${letter}`)
         var indices = []
         var str = this.#answer.toLowerCase()
         for(var i = 0; i < str.length; i++) {
@@ -72,10 +69,8 @@ class Hangman {
                 indices.push(i)
             }
         }
-        // let charIndex = this.#answer.toLowerCase().indexOf(letter.toLowerCase())
-
+        
         if( indices.length > 0) {
-            console.log(`Found at index: ${indices.toString()}`)
             let result = this.#correct
             var start = 0
             indices.forEach (i => {
@@ -83,11 +78,7 @@ class Hangman {
                 this.#answer.charAt(i),
                 result.substring(i + 1))
             })
-            // let preCharString = this.#correct.substring(0, charIndex)
-            // let answerChar = this.#answer.charAt(charIndex)
-            // let postCharString = this.#correct.substring(charIndex + 1)
-            console.log(`Result: ${result}`)
-            this.#correctGuesses = result //preCharString.concat(answerChar,postCharString)
+            this.#correctGuesses = result
         } else {
             this.#incorrect.push(letter)
             this.#state += 1
