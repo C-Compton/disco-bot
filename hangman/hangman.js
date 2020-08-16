@@ -1,11 +1,12 @@
 'use strict';
 
 const FS = require('fs')
+var rw = require('random-words')
 
 class Hangman {
     #imgDir = './hangman/img/'
 
-    #answer = "Hello World"
+    #answer
     #correct = ""
     #incorrect = new Array()
     
@@ -24,13 +25,17 @@ class Hangman {
         return this.#incorrect
     }
 
+    set #solution(str) {
+        this.#answer = str
+    }
+
     set #correctGuesses(correct) {
         this.#correct = correct
     }
 
-    set #resetCorrectGuesses(answer) {
+    set #resetCorrectGuesses(str) {
         let replaceRegex = /[A-Za-z]/g
-        this.#correct = answer.replace(replaceRegex, "-")
+        this.#correct = str.replace(replaceRegex, "-")
     }
 
     #init() {
@@ -45,6 +50,9 @@ class Hangman {
 
             })
         })
+        let randWord = rw()
+        this.#solution = randWord
+        console.log(`Answer: ${this.#answer}`)
         this.#resetCorrectGuesses = this.#answer
     }
 
