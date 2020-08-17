@@ -167,7 +167,7 @@ If you can guess the correct word, you'll survive...`)
     .then(p => hangmanGame = new Hangman)
     .then(p => {
         received.channel.send(`Here is your first word...
-        ${hangmanGame.correctGuesses}`,{
+        ${hangmanGame.getCorrectGuesses()}`,{
             files: [{
                 attachment: './hangman/img/hangman01.png',
                 name: 'hangman.png'
@@ -182,9 +182,9 @@ function processHangmanGuess(received) {
     hangmanGame.guessLetter(received.content)
     
     received.channel.send(`    
-    ${hangmanGame.correctGuesses}
+    ${hangmanGame.getCorrectGuesses()}
     
-    ${hangmanGame.incorrectGuesses.sort().join(', ')}`,{
+    ${hangmanGame.getIncorrectGuesses().sort().join(', ')}`,{
     files: [{
         attachment: hangmanGame.getImage(),
         name: 'hangman.png'
