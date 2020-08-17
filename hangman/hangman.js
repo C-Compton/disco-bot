@@ -33,6 +33,10 @@ class Hangman {
         this.resetCorrectGuesses(this.answer)
     }
 
+    getAnswer() {
+        return this.answer
+    }
+    
     setSolution(str) {
         this.answer = str
     }

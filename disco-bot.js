@@ -192,7 +192,8 @@ function processHangmanGuess(received) {
     })
     .then(p => {
         if(hangmanGame.didLose() === true){
-            received.channel.send(`Oh my! ${received.author.toString()} lost!`)
+            received.channel.send(`Oh my! ${received.author.toString()} lost!
+            The answer is : ${hangmanGame.getAnswer()}`)
             .then(p => {
                 hangmanGame = null
             })
