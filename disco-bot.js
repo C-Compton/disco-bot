@@ -133,6 +133,9 @@ function deleteCommand(cmd, args, received) {
             do {
                 fetched = await received.channel.messages.fetch({limit: 99})
                 .then(m => {
+                    return m.filter(m => m.author.id === client.user.id)
+                })
+                .then(m => {
                     return m.filter(m => m.attachments.size > 0)
                 })
                 .then(m => {
