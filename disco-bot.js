@@ -175,6 +175,7 @@ function deleteCommand(cmd, args, received) {
             
                 clear()
         }
+        received.delete().catch(console.error)
     } else {
         received.channel.send(`Sorry, Dave. I can't let you do that.`)
         .catch(console.error)
