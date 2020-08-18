@@ -129,6 +129,20 @@ function deleteCommand(cmd, args, received) {
             } while(fetched.size >= 2)
         }
 
+        async function clearBot() {
+            do {
+                fetched = await received.channel.messages.fetch({limit: 99})
+                .then(m => {
+                    return m.filter(m => m.author.id === client.user.id)
+                })
+                .then( m => {
+                    received.channel.bulkDelete(m).catch(console.error)
+                    return m
+                })
+                .catch(console.error)
+            } while (fetched.size >= 2)
+        }
+
         async function clearAttach() {
             do {
                 fetched = await received.channel.messages.fetch({limit: 99})
@@ -151,6 +165,9 @@ function deleteCommand(cmd, args, received) {
                 case 'attachment':
                     clearAttach()                
                 break
+                case 'bot':
+                    clearBot()
+                    break
                 default:
                     console.log(`Unknown arg to delete cmd`)
             }
